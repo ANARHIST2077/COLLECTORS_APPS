@@ -150,6 +150,7 @@ if (saveCarBtn) {
     cars.push(newCar);
     renderCard(newCar);
     saveData();
+    updateCarCountLabel();
 
     // очистка формы
     carNameInput.value = '';
@@ -317,6 +318,7 @@ if (deleteSlider) {
       if (card) { card.style.opacity = 0; setTimeout(() => card.remove(), 500); }
       cars = cars.filter(c => Number(c.id) !== Number(carIdToDelete));
       saveData();
+      updateCarCountLabel();
       if (deleteFeedback) { deleteFeedback.textContent = "✓ Удалено!"; deleteFeedback.classList.add("success"); }
       setTimeout(closeDeleteModal, 1000);
     }
@@ -372,8 +374,19 @@ function filterCards(query) {
   });
 
   filtered.forEach(c => renderCard(c));
+  updateCarCountLabel(filtered);
 }
+
+const carCountLabel = document.getElementById('carCountLabel');
+
+function updateCarCountLabel(filteredCars = null) {
+  // если передан фильтр, считаем его, иначе считаем все cars
+  const count = (filteredCars ?? cars).length;
+  if (carCountLabel) carCountLabel.textContent = `Машин в гараже: ${count}`;
+}
+
 
 
 // ====== INIT ======
 loadData();
+updateCarCountLabel();
