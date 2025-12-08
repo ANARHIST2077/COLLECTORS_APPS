@@ -441,6 +441,17 @@ if (closeViewModal && viewCarModal) {
 }
 
 const editCarBtn = document.getElementById("editCarBtn");
+const editCarModal = document.getElementById("editCarModal");
+const closeEditModal = document.getElementById("closeEditModal");
+
+const editNameInput = document.getElementById("editCarName");
+const editRealYearInput = document.getElementById("editRealYear");
+const editModelYearInput = document.getElementById("editModelYear");
+const editPriceInput = document.getElementById("editPrice");
+const editCarImageFile = document.getElementById("editCarImageFile");
+
+const saveEditCarBtn = document.getElementById("saveEditCarBtn");
+
 
 if (editCarBtn) {
   editCarBtn.addEventListener("click", () => {
@@ -449,16 +460,77 @@ if (editCarBtn) {
     // Закрываем модал просмотра
     viewCarModal.style.display = 'none';
 
-    // Покажем пока просто alert (проверим работу)
-    alert("Открываем режим редактирования для: " + carBeingEdited.name);
+    editNameInput.value = carBeingEdited.name || "";
+    editRealYearInput.value = carBeingEdited.realYear ?? "";
+    editModelYearInput.value = carBeingEdited.modelYear ?? "";
+    editPriceInput.value = carBeingEdited.price ?? "";
+    editCarImageFile.value = ""; // файл нельзя автозаполнить
 
-    /*
-      ⚡ На следующем шаге мы вместо alert откроем новую
-      модалку для редактирования с заранее заполненными
-      полями.
-    */
+    // закрываем просмотр
+    viewCarModal.style.display = "none";
+    viewCarModal.classList.add("hidden");
+
+    // открываем редактирование
+    editCarModal.style.display = "flex";
+    editCarModal.classList.remove("hidden");
   });
 }
+
+if (closeEditModal) {
+      closeEditModal.addEventListener("click", () => {
+        editCarModal.style.display = "none";
+        editCarModal.classList.add("hidden");
+      });
+    }
+
+if (saveEditCarBtn) {
+  saveEditCarBtn.addEventListener("click", async () => {
+
+    if (!carBeingEdited) return;
+
+    // записываем изменения
+    carBeingEdited.name = editNameInput.value.trim();
+    carBeingEdited.realYear = editRealYearInput.value ? parseInt(editRealYearInput.value) : null;
+    carBeingEdited.modelYear = editModelYearInput.value ? parseInt(editModelYearInput.value) : null;
+    carBeingEdited.price = editPriceInput.value ? parseInt(editPriceInput.value) : null;
+
+    // обработка новой картинки
+    if (editCarImageFile.files && editCarImageFile.files.length > 0) {
+      const file = editCarImageFile.files[0];
+      const imagesDir = path.join(userDataPath, 'images');
+      fs.ensureDirSync(imagesDir);
+
+      const safeName = `${Date.now()}_${path.basename(file.name)}`;
+      const newFilePath = path.join(imagesDir, safeName);
+
+      if (file.path) {
+        fs.copyFileSync(file.path, newFilePath);
+        carBeingEdited.image = pathToFileURL(newFilePath).href;
+      } else {
+        // fallback base64
+        await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = e => {
+            carBeingEdited.image = e.target.result;
+            resolve();
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+    }
+
+    saveData();
+
+    // пересобрать список
+    container.innerHTML = "";
+    cars.forEach(c => renderCard(c));
+
+    editCarModal.style.display = "none";
+    editCarModal.classList.add("hidden");
+  });
+}
+
 
 
 
