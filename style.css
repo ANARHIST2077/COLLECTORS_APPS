@@ -223,3 +223,31 @@ button:hover {
   font-size: 16px;
   cursor: pointer;
 }
+
+.image-viewer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.4);
+    border: none;
+    color: white;
+    font-size: 24px;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 6px;
+    user-select: none;
+}
+
+#prevImageBtn {
+    left: -10px;
+}
+#nextImageBtn {
+    right: -10px;
+}

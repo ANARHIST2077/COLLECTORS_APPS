@@ -44,7 +44,7 @@
 
         <label>
           Photo:
-          <input type="file" id="carImageFile" accept="image/*">
+          <input type="file" id="carImageFiles" accept="image/*" multiple>
         </label>
         <br>
 
@@ -68,13 +68,22 @@
     <div id="viewCarModal" class="info-modal">
       <div class="modal-content">
         <span id="closeViewModal" class="close">&times;</span>
-        <img id="viewCarImage" src="" alt="Фото машинки" style="max-width: 100%; border-radius: 10px;" />
+        <div class="image-viewer">
+            <button id="prevImageBtn" class="nav-btn">&#10094;</button>
+
+            <img id="viewCarImage"
+                src=""
+                alt="Фото машинки"
+                class="viewer-image"
+                style="max-width: 100%; border-radius: 10px;" />
+
+            <button id="nextImageBtn" class="nav-btn">&#10095;</button>
+        </div>
         <h2 id="viewCarName"></h2>
         <p><strong>Год реальной машины:</strong> <span id="viewRealYear"></span></p>
         <p><strong>Год модельки:</strong> <span id="viewModelYear"></span></p>
         <p><strong>Стоимость:</strong> <span id="viewPrice"></span></p>
 
-        <!-- 🔥 Новая кнопка -->
         <button id="editCarBtn" class="edit-btn">Редактировать</button>
       </div>
     </div>
@@ -89,18 +98,23 @@
 
         <label>Название:</label>
         <input type="text" id="editCarName" />
+        <br>
 
         <label>Год реальной машины:</label>
         <input type="number" id="editRealYear" />
+        <br>
 
         <label>Год модельки:</label>
         <input type="number" id="editModelYear" />
+        <br>
 
         <label>Стоимость (₽):</label>
         <input type="number" id="editPrice" />
+        <br>
 
         <label>Фото:</label>
-        <input type="file" id="editCarImageFile" accept="image/*" />
+        <input type="file" id="editCarImageFile" accept="image/*" multiple>
+        <br>
 
         <button id="saveEditCarBtn" class="save-btn">
           Сохранить изменения
