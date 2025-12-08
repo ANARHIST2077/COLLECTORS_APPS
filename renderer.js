@@ -350,5 +350,30 @@ function loadData() {
   } catch (err) { console.error('Ошибка загрузки данных:', err); }
 }
 
+
+//Поиск
+const searchInput = document.getElementById('searchInput');
+
+if (searchInput) {
+  searchInput.addEventListener('input', () => {
+    const query = searchInput.value.trim().toLowerCase();
+    filterCards(query);
+  });
+}
+
+function filterCards(query) {
+  // очистим контейнер
+  container.innerHTML = '';
+
+  // фильтруем по названию
+  const filtered = cars.filter(car => {
+    if (!car.name) return false;
+    return car.name.toLowerCase().includes(query);
+  });
+
+  filtered.forEach(c => renderCard(c));
+}
+
+
 // ====== INIT ======
 loadData();
