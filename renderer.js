@@ -27,6 +27,7 @@ const modelYearInput = document.getElementById('modelYear');
 const priceInput = document.getElementById('price');
 
 let cars = [];
+let carBeingEdited = null;
 let carId = 0;
 
 // ==== Утилиты ====
@@ -395,6 +396,7 @@ const closeViewModal = document.getElementById("closeViewModal");
 
 // Функция открытия модалки инфо карты с данными
 function openViewModal(car) {
+  carBeingEdited = car;
   // защитные проверки наличия модалки и полей
   if (!viewCarModal) return;
   const nameEl = document.getElementById("viewCarName");
@@ -437,6 +439,27 @@ if (closeViewModal && viewCarModal) {
     viewCarModal.style.display = 'none';
   });
 }
+
+const editCarBtn = document.getElementById("editCarBtn");
+
+if (editCarBtn) {
+  editCarBtn.addEventListener("click", () => {
+    if (!carBeingEdited) return;
+
+    // Закрываем модал просмотра
+    viewCarModal.style.display = 'none';
+
+    // Покажем пока просто alert (проверим работу)
+    alert("Открываем режим редактирования для: " + carBeingEdited.name);
+
+    /*
+      ⚡ На следующем шаге мы вместо alert откроем новую
+      модалку для редактирования с заранее заполненными
+      полями.
+    */
+  });
+}
+
 
 
 

@@ -73,6 +73,50 @@
         <p><strong>Год реальной машины:</strong> <span id="viewRealYear"></span></p>
         <p><strong>Год модельки:</strong> <span id="viewModelYear"></span></p>
         <p><strong>Стоимость:</strong> <span id="viewPrice"></span></p>
+
+        <!-- 🔥 Новая кнопка -->
+        <button id="editCarBtn" class="edit-btn">Редактировать</button>
+      </div>
+    </div>
+
+
+    <!-- 🔥 Новая модалка: редактирование машины -->
+    <div id="editCarModal" class="modal" style="display:none;">
+      <div class="modal-content">
+        <span id="closeEditModal" class="close">&times;</span>
+        <h2>Edit Car</h2>
+
+        <label>
+          Name:
+          <input type="text" id="editCarName">
+        </label>
+        <br>
+
+        <label>
+          Real Car Year:
+          <input type="number" id="editRealYear">
+        </label>
+        <br>
+
+        <label>
+          Model Year:
+          <input type="number" id="editModelYear">
+        </label>
+        <br>
+
+        <label>
+          Price:
+          <input type="number" id="editPrice">
+        </label>
+        <br>
+
+        <label>
+          Replace Photo:
+          <input type="file" id="editCarImageFile" accept="image/*">
+        </label>
+        <br>
+
+        <button id="saveEditCarBtn" class="save-btn">Save Changes</button>
       </div>
     </div>
 
