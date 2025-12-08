@@ -1,0 +1,206 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0d0d0d;
+  color: #ffd700;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.controls {
+  margin-bottom: 20px;
+}
+
+button {
+  background: #ffd700;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+button:hover {
+  background: #e6c200;
+}
+
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.card {
+  background: #1a1a1a;
+  border: 2px solid #ffd700;
+  border-radius: 12px;
+  padding: 15px;
+  position: relative;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+}
+
+.card h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.card p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: #ffd700;
+  cursor: pointer;
+}
+.delete-btn:hover {
+  color: red;
+}
+
+/* Общие стили модалок */
+.modal {
+  display: none; /* скрыто по умолчанию */
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6);
+  z-index: 10;
+}
+
+.modal-content {
+  background-color: #1a1a1a;
+  color: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  border: 1px solid #444;
+  width: 300px;
+  border-radius: 12px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: #fff;
+}
+
+
+/* стиль карточки */
+.car-image {
+  width: 100%;
+  max-height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.car-thumb {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: #222;
+}
+.car-thumb.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+  font-size: 14px;
+}
+
+/* Слайдер */
+#deleteSlider {
+  -webkit-appearance: none;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(to right, #ff4d4d, #ccc);
+  outline: none;
+  transition: background 0.3s;
+  cursor: pointer;
+}
+#deleteSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #ff4d4d;
+  cursor: grab;
+  transition: transform 0.2s;
+}
+#deleteSlider:active::-webkit-slider-thumb {
+  transform: scale(1.2);
+}
+#deleteFeedback {
+  text-align: center;
+  font-weight: bold;
+  color: green;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+#deleteFeedback.success {
+  opacity: 1;
+}
+
+/* Модалка информации о карточке */
+.info-modal {
+  display: none; /* тоже скрыта по умолчанию */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: #383838;
+  padding: 20px;
+  border-radius: 12px;
+  width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 20px;
+  cursor: pointer;
+}

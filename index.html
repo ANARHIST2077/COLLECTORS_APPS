@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hot Wheels Collection</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1 class="title">🔥 Hot Wheels Collection 🔥</h1>
+
+  <div class="controls">
+    <button id="addCarBtn">+ Add Car</button>
+    
+
+    <!-- Модальное окно добавление карты -->
+    <div id="addCarModal" class="modal">
+      <div class="modal-content">
+        <span id="closeModal" class="close">&times;</span>
+        <h2>Add New Car</h2>
+
+        <label>
+          Name (required):
+          <input type="text" id="carName" required>
+        </label>
+        <br>
+
+        <label>
+          Real Car Year:
+          <input type="number" id="realYear" placeholder="например 1970">
+        </label>
+        <br>
+
+        <label>
+          Model Year:
+          <input type="number" id="modelYear" placeholder="например 2020">
+        </label>
+        <br>
+
+        <label>
+          Price:
+          <input type="number" id="price" placeholder="₽">
+        </label>
+        <br>
+
+        <label>
+          Photo:
+          <input type="file" id="carImageFile" accept="image/*">
+        </label>
+        <br>
+
+        <button id="saveCarBtn">Save</button>
+      </div>
+    </div>
+
+
+    <!-- Модальное окно подтверждения удаления -->
+    <div id="deleteConfirmModal" class="modal" style="display:none;">
+      <div class="modal-content">
+        <h2>Подтверждение удаления</h2>
+        <p>Для удаления перетащите ползунок вправо</p>
+        <input type="range" id="deleteSlider" min="0" max="100" value="0" style="width:100%;">
+        <div id="deleteFeedback" style="margin-top:10px; height:20px;"></div>
+        <button id="cancelDeleteBtn">Отмена</button>
+      </div>
+    </div>
+
+    <!-- Модалка для просмотра карточки -->
+    <div id="viewCarModal" class="info-modal">
+      <div class="modal-content">
+        <span id="closeViewModal" class="close">&times;</span>
+        <img id="viewCarImage" src="" alt="Фото машинки" style="max-width: 100%; border-radius: 10px;" />
+        <h2 id="viewCarName"></h2>
+        <p><strong>Год реальной машины:</strong> <span id="viewRealYear"></span></p>
+        <p><strong>Год модельки:</strong> <span id="viewModelYear"></span></p>
+        <p><strong>Стоимость:</strong> <span id="viewPrice"></span></p>
+      </div>
+    </div>
+
+
+
+  </div>
+
+  <div id="cardsContainer" class="cards-container"></div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
