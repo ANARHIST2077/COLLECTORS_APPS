@@ -161,17 +161,64 @@ if (saveCarBtn) {
   });
 }
 
+// ====== Элементы для редактирования фото ======
+const editImagesContainer = document.getElementById('editImagesContainer'); // создаем <div id="editImagesContainer"></div> в HTML под полем input
+
+// Функция рендера мини-картинок в модалке редактирования
+function renderEditImages() {
+  if (!editImagesContainer || !carBeingEdited) return;
+  editImagesContainer.innerHTML = '';
+
+  (carBeingEdited.images || []).forEach((imgSrc, idx) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'edit-image-wrapper';
+    wrapper.draggable = true;
+    wrapper.dataset.index = idx;
+
+    const img = document.createElement('img');
+    img.src = imgSrc;
+    wrapper.appendChild(img);
+
+    const delBtn = document.createElement('button');
+    delBtn.textContent = '×';
+    delBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      carBeingEdited.images.splice(idx, 1);
+      renderEditImages();
+    });
+    wrapper.appendChild(delBtn);
+
+    // drag & drop
+    wrapper.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', idx);
+    });
+    wrapper.addEventListener('dragover', (e) => e.preventDefault());
+    wrapper.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
+      const toIdx = parseInt(wrapper.dataset.index);
+      if (fromIdx === toIdx) return;
+      const moved = carBeingEdited.images.splice(fromIdx, 1)[0];
+      carBeingEdited.images.splice(toIdx, 0, moved);
+      renderEditImages();
+    });
+
+    editImagesContainer.appendChild(wrapper);
+  });
+}
+
 // ====== Редактирование карточки ======
 if (editCarBtn) {
   editCarBtn.addEventListener("click", () => {
     if (!carBeingEdited) return;
 
-    // открыть редактирование
     editNameInput.value = carBeingEdited.name || "";
     editRealYearInput.value = carBeingEdited.realYear ?? "";
     editModelYearInput.value = carBeingEdited.modelYear ?? "";
     editPriceInput.value = carBeingEdited.price ?? "";
     editCarImageFile.value = "";
+
+    renderEditImages(); // показываем все текущие фото
 
     viewCarModal.style.display = "none";
     editCarModal.style.display = "flex";
