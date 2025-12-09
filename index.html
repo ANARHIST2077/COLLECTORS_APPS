@@ -9,12 +9,22 @@
   <h1 class="title">🔥 Hot Wheels Collection 🔥</h1>
 
   <div class="controls">
+    <button id="exportBtn">Выгрузить коллекцию</button>
+    <input type="file" id="importFile" accept=".json" style="display:none;">
+    <button id="importBtn">Загрузить коллекцию</button>
+
     <button id="addCarBtn">+ Add Car</button>
     
     <label>
       Поиск:
       <input type="text" id="searchInput" placeholder="Введите название...">
     </label>
+
+    <div class="stats">
+      <span id="carCountLabel">Машин в гараже: 0</span>
+      <span id="totalPriceLabel">Общая стоимость: 0 ₽</span>
+    </div>
+
 
     <p id="carCountLabel">Машин в гараже: 0</p>
 
@@ -25,6 +35,7 @@
         <span id="closeModal" class="close">&times;</span>
         <h2>Add New Car</h2>
 
+    
         <label>
           Name (required):
           <input type="text" id="carName" required>
@@ -90,6 +101,7 @@
         <p><strong>Год реальной машины:</strong> <span id="viewRealYear"></span></p>
         <p><strong>Год модельки:</strong> <span id="viewModelYear"></span></p>
         <p><strong>Стоимость:</strong> <span id="viewPrice"></span></p>
+        
 
         <button id="editCarBtn" class="edit-btn">Редактировать</button>
       </div>

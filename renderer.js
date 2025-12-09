@@ -105,6 +105,8 @@ function renderCard(car) {
   priceP.textContent = car.price ? `${car.price} ₽` : '-';
   card.appendChild(priceP);
 
+
+
   // Открытие просмотра
   card.addEventListener('click', () => openViewModal(car));
 
@@ -151,6 +153,7 @@ if (saveCarBtn) {
     renderCard(newCar);
     saveData();
     updateCarCountLabel();
+    updateCarStats();
 
     // очистка формы
     carNameInput.value = '';
@@ -244,6 +247,7 @@ if (saveEditCarBtn) {
     }
 
     saveData();
+    updateCarStats();
     container.innerHTML = '';
     cars.forEach(c => renderCard(c));
 
@@ -319,6 +323,7 @@ if (deleteSlider) {
       cars = cars.filter(c => Number(c.id) !== Number(carIdToDelete));
       saveData();
       updateCarCountLabel();
+      updateCarStats();
       if (deleteFeedback) { deleteFeedback.textContent = "✓ Удалено!"; deleteFeedback.classList.add("success"); }
       setTimeout(closeDeleteModal, 1000);
     }
@@ -353,13 +358,17 @@ function loadData() {
 }
 
 
+
+
 //Поиск
 const searchInput = document.getElementById('searchInput');
 
 if (searchInput) {
   searchInput.addEventListener('input', () => {
     const query = searchInput.value.trim().toLowerCase();
+    const filtered = cars.filter(c => c.name?.toLowerCase().includes(query));
     filterCards(query);
+    updateCarStats(filtered);
   });
 }
 
@@ -385,8 +394,115 @@ function updateCarCountLabel(filteredCars = null) {
   if (carCountLabel) carCountLabel.textContent = `Машин в гараже: ${count}`;
 }
 
+//Экспорт коллекции
+const exportBtn = document.getElementById('exportBtn');
+const importBtn = document.getElementById('importBtn');
+const importFile = document.getElementById('importFile');
+
+exportBtn.addEventListener('click', async () => {
+  // создаём копию массива cars
+  const exportData = [];
+
+  for (const car of cars) {
+    const carCopy = { ...car };
+
+    // фото конвертируем в base64
+    carCopy.imagesBase64 = [];
+
+    if (car.images && car.images.length > 0) {
+      for (const imgUrl of car.images) {
+        if (imgUrl.startsWith('file://')) {
+          const imgPath = new URL(imgUrl).pathname;
+          const buffer = fs.readFileSync(imgPath);
+          const base64 = `data:image/${path.extname(imgPath).slice(1)};base64,${buffer.toString('base64')}`;
+          carCopy.imagesBase64.push(base64);
+        } else {
+          carCopy.imagesBase64.push(imgUrl); // уже base64
+        }
+      }
+    }
+
+    exportData.push(carCopy);
+  }
+
+  // создаём blob и "скачиваем"
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'hotwheels_collection.json';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+//Импорт коллекции
+importBtn.addEventListener('click', () => importFile.click());
+
+importFile.addEventListener('change', async (e) => {
+  const file = importFile.files[0];
+  if (!file) return;
+
+  const text = await file.text();
+  let importedCars;
+  try {
+    importedCars = JSON.parse(text);
+  } catch (err) {
+    alert('Ошибка: файл повреждён или неверного формата');
+    return;
+  }
+
+  // нормализуем и создаём новые id
+  for (const rawCar of importedCars) {
+    const car = normalizeCar(rawCar);
+    car.id = carId++;
+    car.images = [];
+
+    if (rawCar.imagesBase64 && rawCar.imagesBase64.length > 0) {
+      const imagesDir = path.join(userDataPath, 'images');
+      fs.ensureDirSync(imagesDir);
+
+      for (const base64 of rawCar.imagesBase64) {
+        const matches = base64.match(/^data:image\/(\w+);base64,(.+)$/);
+        if (matches) {
+          const ext = matches[1];
+          const data = matches[2];
+          const buffer = Buffer.from(data, 'base64');
+          const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+          const filePath = path.join(imagesDir, fileName);
+          fs.writeFileSync(filePath, buffer);
+          car.images.push(pathToFileURL(filePath).href);
+        }
+      }
+    }
+
+    cars.push(car);
+    renderCard(car);
+  }
+
+  saveData();
+  updateCarCountLabel();
+  updateCarStats();
+  alert('Коллекция загружена!');
+
+  // <-- добавляем эту строку -->
+  importFile.value = ''; // очищаем input, чтобы можно было выбрать файл снова
+});
+
+
+const totalPriceLabel = document.getElementById('totalPriceLabel');
+
+function updateCarStats(filteredCars = cars) {
+  const count = filteredCars.length;
+  const totalPrice = filteredCars.reduce((sum, car) => sum + (car.price ?? 0), 0);
+
+  if (carCountLabel) carCountLabel.textContent = `Машин в гараже: ${count}`;
+  if (totalPriceLabel) totalPriceLabel.textContent = `Общая стоимость: ${totalPrice} ₽`;
+}
+
 
 
 // ====== INIT ======
 loadData();
 updateCarCountLabel();
+updateCarStats();
