@@ -150,10 +150,9 @@ if (saveCarBtn) {
     };
 
     cars.push(newCar);
-    renderCard(newCar);
     saveData();
-    updateCarCountLabel();
-    updateCarStats();
+    updateYearFilterOptions();
+    renderAllCards();
 
     // очистка формы
     carNameInput.value = '';
@@ -247,9 +246,8 @@ if (saveEditCarBtn) {
     }
 
     saveData();
-    updateCarStats();
-    container.innerHTML = '';
-    cars.forEach(c => renderCard(c));
+    updateYearFilterOptions();
+    renderAllCards();
 
     editCarModal.style.display = "none";
     editCarModal.classList.add("hidden");
@@ -322,8 +320,8 @@ if (deleteSlider) {
       if (card) { card.style.opacity = 0; setTimeout(() => card.remove(), 500); }
       cars = cars.filter(c => Number(c.id) !== Number(carIdToDelete));
       saveData();
-      updateCarCountLabel();
-      updateCarStats();
+      updateYearFilterOptions();
+      updateCarStats(getVisibleCars());
       if (deleteFeedback) { deleteFeedback.textContent = "✓ Удалено!"; deleteFeedback.classList.add("success"); }
       setTimeout(closeDeleteModal, 1000);
     }
@@ -351,48 +349,12 @@ function loadData() {
         { id: carId++, name: "DeLorean DMC-12", images: [], realYear: 1981, modelYear: 2023, price: null }
       ];
     }
-    container.innerHTML = '';
-    cars.forEach(c => renderCard(c));
     saveData();
   } catch (err) { console.error('Ошибка загрузки данных:', err); }
 }
 
-
-
-
-//Поиск
 const searchInput = document.getElementById('searchInput');
-
-if (searchInput) {
-  searchInput.addEventListener('input', () => {
-    const query = searchInput.value.trim().toLowerCase();
-    const filtered = cars.filter(c => c.name?.toLowerCase().includes(query));
-    filterCards(query);
-    updateCarStats(filtered);
-  });
-}
-
-function filterCards(query) {
-  // очистим контейнер
-  container.innerHTML = '';
-
-  // фильтруем по названию
-  const filtered = cars.filter(car => {
-    if (!car.name) return false;
-    return car.name.toLowerCase().includes(query);
-  });
-
-  filtered.forEach(c => renderCard(c));
-  updateCarCountLabel(filtered);
-}
-
 const carCountLabel = document.getElementById('carCountLabel');
-
-function updateCarCountLabel(filteredCars = null) {
-  // если передан фильтр, считаем его, иначе считаем все cars
-  const count = (filteredCars ?? cars).length;
-  if (carCountLabel) carCountLabel.textContent = `Машин в гараже: ${count}`;
-}
 
 //Экспорт коллекции
 const exportBtn = document.getElementById('exportBtn');
@@ -477,12 +439,11 @@ importFile.addEventListener('change', async (e) => {
     }
 
     cars.push(car);
-    renderCard(car);
   }
 
   saveData();
-  updateCarCountLabel();
-  updateCarStats();
+  updateYearFilterOptions();
+  renderAllCards();
   alert('Коллекция загружена!');
 
   // <-- добавляем эту строку -->
@@ -515,7 +476,7 @@ document.querySelectorAll(".nav-item").forEach(item => {
     if (tab === "garage") {
       searchBarWrapper.style.display = "none";
       searchInputUI.value = "";
-      renderCardsList(cars); // Обновляем список
+      renderAllCards(); // Обновляем список
     }
 
     if (tab === "search") {
@@ -528,7 +489,7 @@ document.querySelectorAll(".nav-item").forEach(item => {
 // Логика поиска
 searchInputUI.addEventListener("input", () => {
   const q = searchInputUI.value.toLowerCase().trim();
-  const filtered = cars.filter(c => c.name.toLowerCase().includes(q));
+  const filtered = cars.filter(c => (c.name || "").toLowerCase().includes(q));
   renderCardsList(filtered);
 });
 
@@ -542,10 +503,31 @@ const searchPanel = document.getElementById("searchPanel");
 
 let currentGarageTab = "all";
 
-// 🔥 функция ВНЕ forEach
-function renderAllCards() {
+function renderCardsList(list) {
   container.innerHTML = "";
+  list.forEach(c => renderCard(c));
+  updateCarStats(list);
+}
 
+// Годы в фильтре берутся из коллекции
+function updateYearFilterOptions() {
+  if (!yearFilter) return;
+  const selected = yearFilter.value;
+  const years = [...new Set(cars.map(c => c.modelYear).filter(y => y !== null && y !== undefined))]
+    .sort((a, b) => b - a);
+
+  yearFilter.innerHTML = '<option value="">Все</option>';
+  years.forEach(y => {
+    const opt = document.createElement("option");
+    opt.value = String(y);
+    opt.textContent = String(y);
+    yearFilter.appendChild(opt);
+  });
+  yearFilter.value = years.map(String).includes(selected) ? selected : "";
+}
+
+// Машинки с учётом текущей вкладки, поиска и фильтра
+function getVisibleCars() {
   let filteredCars = [...cars];
 
   // 🔍 ПОИСК
@@ -570,8 +552,11 @@ function renderAllCards() {
     }
   }
 
-  filteredCars.forEach(c => renderCard(c));
-  updateGarageStats(filteredCars);
+  return filteredCars;
+}
+
+function renderAllCards() {
+  renderCardsList(getVisibleCars());
 }
 
 // 🔥 переключение вкладок
@@ -611,5 +596,5 @@ if (searchInput) {
 
 // ====== INIT ======
 loadData();
-updateCarCountLabel();
-updateCarStats();
+updateYearFilterOptions();
+renderAllCards();
