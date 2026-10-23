@@ -1,6 +1,6 @@
 # Hot Wheels Collection
 
-Десктопное приложение для учёта коллекции машинок Hot Wheels (Electron).
+Приложение для учёта коллекции машинок Hot Wheels. Сейчас — Windows (Electron), в планах — Android (Capacitor) на том же коде интерфейса.
 
 ## Возможности
 
@@ -11,7 +11,11 @@
 - Счётчик машин и общая стоимость коллекции
 - Выгрузка и загрузка коллекции в JSON (вместе с фото)
 
-## Запуск
+## Скачать
+
+Готовый exe (без установки) — в [Releases](https://github.com/ANARHIST2077/COLLECTORS_APPS/releases).
+
+## Запуск из исходников
 
 Нужен [Node.js](https://nodejs.org/).
 
@@ -20,11 +24,28 @@ npm install
 npm start
 ```
 
+Сборка exe: `npm run dist` → `dist\HotWheels-Collection-<версия>-portable.exe`.
+
+## Устройство
+
+```
+main.js              окно Electron
+main-storage.js      работа с диском (main-процесс)
+preload.js           мост: интерфейсу доступны только функции хранилища
+index.html, style.css
+renderer.js          точка входа интерфейса
+src/core/            модель машинки, миграция форматов (чистый JS)
+src/storage/         адаптер хранилища (для Android будет свой)
+src/ui/              интерфейс
+```
+
 ## Где хранятся данные
 
 Коллекция сохраняется не в папке проекта, а в профиле пользователя:
 
 ```
-%APPDATA%\hotwheels-app\hotwheels_data.json
+%APPDATA%\hotwheels-app\collection.json
 %APPDATA%\hotwheels-app\images\
 ```
+
+С версии 2.0 формат данных новый (`collection.json`). При первом запуске старый `hotwheels_data.json` автоматически переводится в новый формат; перед этим он и папка `images` копируются в `backup-<дата>`. Сам старый файл не изменяется.
