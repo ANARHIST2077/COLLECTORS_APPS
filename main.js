@@ -1,18 +1,17 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
+const { registerStorageHandlers } = require('./main-storage');
 
 
 
 function createWindow() {
-  const userDataPath = app.getPath('userData'); // безопасная папка для хранения данных
-
   const win = new BrowserWindow({
     width: 1000,
     height: 700,
     webPreferences: {
-      nodeIntegration: true,        // для простоты прототипа — позволяет require() в рендере
-      contextIsolation: false,      // выключаем изоляцию (тоже для простоты)
-      additionalArguments: [`--userDataPath=${userDataPath}`]
+      preload: path.join(__dirname, 'preload.js'), // доступ к диску только через preload
+      nodeIntegration: false,
+      contextIsolation: true
     }
   });
 
@@ -23,7 +22,10 @@ function createWindow() {
   //win.webContents.openDevTools({ mode: 'detach' });
 }
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  registerStorageHandlers();
+  createWindow();
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
