@@ -1,5 +1,5 @@
 // Гараж: список карточек, вкладки, поиск, фильтр по году, статистика
-import { collection } from '../collection.js';
+import { activeCars } from '../collection.js';
 import { renderCard } from './cards.js';
 
 const container = document.getElementById('cardsContainer');
@@ -21,7 +21,7 @@ export function initGarage(handlers) {
   cardHandlers = handlers;
 }
 
-export function updateCarStats(filteredCars = collection.cars) {
+export function updateCarStats(filteredCars = activeCars()) {
   const count = filteredCars.length;
   const totalPrice = filteredCars.reduce((sum, car) => sum + (car.price ?? 0), 0);
 
@@ -39,7 +39,7 @@ function renderCardsList(list) {
 export function updateYearFilterOptions() {
   if (!yearFilter) return;
   const selected = yearFilter.value;
-  const years = [...new Set(collection.cars.map(c => c.modelYear).filter(y => y !== null && y !== undefined))]
+  const years = [...new Set(activeCars().map(c => c.modelYear).filter(y => y !== null && y !== undefined))]
     .sort((a, b) => b - a);
 
   yearFilter.innerHTML = '<option value="">Все</option>';
@@ -54,7 +54,7 @@ export function updateYearFilterOptions() {
 
 // Машинки с учётом текущей вкладки, поиска и фильтра
 export function getVisibleCars() {
-  let filteredCars = [...collection.cars];
+  let filteredCars = activeCars();
 
   // 🔍 ПОИСК
   if (currentGarageTab === "all" && searchInput) {
@@ -115,7 +115,7 @@ document.querySelectorAll(".nav-item").forEach(item => {
 // Логика поиска
 searchInputUI.addEventListener("input", () => {
   const q = searchInputUI.value.toLowerCase().trim();
-  const filtered = collection.cars.filter(c => (c.name || "").toLowerCase().includes(q));
+  const filtered = activeCars().filter(c => (c.name || "").toLowerCase().includes(q));
   renderCardsList(filtered);
 });
 

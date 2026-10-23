@@ -1,6 +1,6 @@
 // Выгрузка и загрузка коллекции файлом (перенос между устройствами)
-import { normalizeCar } from '../core/car.js';
-import { collection, newId, saveCollection } from '../collection.js';
+import { normalizeCar, createCar } from '../core/car.js';
+import { collection, activeCars, saveCollection } from '../collection.js';
 import * as storage from '../storage/electron-storage.js';
 import { refreshGarage } from './garage.js';
 
@@ -12,13 +12,13 @@ const importFile = document.getElementById('importFile');
 exportBtn.addEventListener('click', async () => {
   const exportData = [];
 
-  for (const car of collection.cars) {
+  for (const car of activeCars()) {
     const carCopy = { ...car };
 
     // фото конвертируем в base64
     carCopy.imagesBase64 = [];
-    for (const imgUrl of car.images || []) {
-      carCopy.imagesBase64.push(await storage.readImageAsDataUrl(imgUrl));
+    for (const imgRef of car.images || []) {
+      carCopy.imagesBase64.push(await storage.readImageAsDataUrl(imgRef));
     }
 
     exportData.push(carCopy);
@@ -51,15 +51,13 @@ importFile.addEventListener('change', async () => {
     return;
   }
 
-  // нормализуем и создаём новые id
+  // каждая машинка из файла — новая запись со своим id
   for (const rawCar of importedCars) {
-    const car = normalizeCar(rawCar);
-    car.id = newId();
-    car.images = [];
+    const car = createCar(normalizeCar(rawCar));
 
     for (const base64 of rawCar.imagesBase64 || []) {
-      const src = await storage.saveImageFromDataUrl(base64);
-      if (src) car.images.push(src);
+      const name = await storage.storeImage(base64);
+      if (name) car.images.push(name);
     }
 
     collection.cars.push(car);

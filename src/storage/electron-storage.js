@@ -2,21 +2,36 @@
 // сюда она приходит через preload.js. На Android будет свой модуль с теми же функциями.
 const bridge = window.hwStorage;
 
-// Сырые данные коллекции или null, если файла ещё нет
-export function loadCars() {
-  return bridge.loadCars();
+// Коллекция: { kind: 'v2' | 'legacy', data } или null, если данных ещё нет
+export function loadData() {
+  return bridge.loadData();
 }
 
-export function saveCars(cars) {
-  return bridge.saveCars(cars);
+export function saveData(data) {
+  return bridge.saveData(data);
+}
+
+// Сохраняет фото (data URL, file:// или ссылка) в папку images, возвращает имя файла или null
+export function storeImage(src) {
+  return bridge.storeImage(src);
+}
+
+// Адрес для <img>: имя файла превращается в путь к папке images, ссылки остаются как есть
+export function getImageUrl(ref) {
+  return /^(data:|https?:|file:)/.test(ref) ? ref : bridge.imagesBaseUrl + ref;
 }
 
 // Фото в виде data URL — для экспорта
-export function readImageAsDataUrl(src) {
-  return bridge.readImageAsDataUrl(src);
+export function readImageAsDataUrl(ref) {
+  return bridge.readImageAsDataUrl(ref);
 }
 
-// Сохраняет фото из data URL в папку images, возвращает ссылку на файл или null
-export function saveImageFromDataUrl(dataUrl) {
-  return bridge.saveImageFromDataUrl(dataUrl);
+// Копия старых данных перед миграцией, возвращает имя папки бэкапа
+export function backupLegacyData() {
+  return bridge.backupLegacyData();
+}
+
+// Переносит неиспользуемые фото в папку бэкапа, возвращает их количество
+export function moveUnusedImagesToBackup(usedNames, backupName) {
+  return bridge.moveUnusedImagesToBackup(usedNames, backupName);
 }

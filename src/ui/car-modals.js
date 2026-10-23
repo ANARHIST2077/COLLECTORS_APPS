@@ -1,6 +1,7 @@
 // Модалки машинки: добавление, просмотр, редактирование, удаление
-import { safeParseInt } from '../core/car.js';
-import { collection, newId, saveCollection } from '../collection.js';
+import { safeParseInt, createCar, touch } from '../core/car.js';
+import { collection, saveCollection } from '../collection.js';
+import { storeImage, getImageUrl } from '../storage/electron-storage.js';
 import { refreshGarage, updateYearFilterOptions, updateCarStats, getVisibleCars } from './garage.js';
 
 // ====== DOM элементы ======
@@ -38,6 +39,7 @@ let carBeingEdited = null;
 let carIdToDelete = null;
 
 // ====== Работа с файлами ======
+// Выбранные фото сохраняются в папку images, возвращаются имена файлов
 async function processFiles(files) {
   const images = [];
   for (const file of files) {
@@ -47,7 +49,7 @@ async function processFiles(files) {
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
-    images.push(base64);
+    images.push(await storeImage(base64) ?? base64);
   }
   return images;
 }
@@ -64,14 +66,8 @@ if (saveCarBtn) {
     const files = carImageFileInput.files;
     const images = await processFiles(files);
 
-    const newCar = {
-      id: newId(),
-      name,
-      images,
-      realYear,
-      modelYear,
-      price
-    };
+    const newCar = createCar({ name, realYear, modelYear, price });
+    newCar.images = images;
 
     collection.cars.push(newCar);
     saveCollection();
@@ -99,7 +95,7 @@ function renderEditImages() {
     wrapper.dataset.index = idx;
 
     const img = document.createElement('img');
-    img.src = imgSrc;
+    img.src = getImageUrl(imgSrc);
     wrapper.appendChild(img);
 
     const delBtn = document.createElement('button');
@@ -165,6 +161,7 @@ if (saveEditCarBtn) {
       carBeingEdited.images.push(...newImages);
     }
 
+    touch(carBeingEdited);
     saveCollection();
     refreshGarage();
 
@@ -203,7 +200,7 @@ export function openViewModal(car) {
   if (priceEl) priceEl.textContent = car.price ? car.price + " ₽" : "-";
 
   let current = 0;
-  const imgs = car.images ?? [];
+  const imgs = (car.images ?? []).map(getImageUrl);
   if (imageEl) imageEl.src = imgs.length ? imgs[0] : 'picture_work/zagluh_card.jpg';
 
   if (prevBtn && nextBtn) {
@@ -237,7 +234,9 @@ if (deleteSlider) {
     if (Number(deleteSlider.value) >= 100 && carIdToDelete !== null) {
       const card = document.querySelector(`.card[data-id="${carIdToDelete}"]`);
       if (card) { card.style.opacity = 0; setTimeout(() => card.remove(), 500); }
-      collection.cars = collection.cars.filter(c => Number(c.id) !== Number(carIdToDelete));
+      // удаление — пометка, а не стирание: так оно дойдёт до других устройств при синхронизации
+      const car = collection.cars.find(c => c.id === carIdToDelete);
+      if (car) { car.deleted = true; touch(car); }
       saveCollection();
       updateYearFilterOptions();
       updateCarStats(getVisibleCars());

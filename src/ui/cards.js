@@ -1,8 +1,7 @@
 // Карточка машинки в гараже
-import { ensureId } from '../collection.js';
+import { getImageUrl } from '../storage/electron-storage.js';
 
 export function renderCard(car, container, { onOpen, onDelete } = {}) {
-  ensureId(car);
   const card = document.createElement('div');
   card.className = 'card';
   card.dataset.id = car.id;
@@ -17,7 +16,7 @@ export function renderCard(car, container, { onOpen, onDelete } = {}) {
   // Изображение
   const imgEl = document.createElement('img');
   imgEl.className = 'car-thumb';
-  imgEl.src = (car.images && car.images.length > 0) ? car.images[0] : 'picture_work/zagluh_card.jpg';
+  imgEl.src = (car.images && car.images.length > 0) ? getImageUrl(car.images[0]) :'picture_work/zagluh_card.jpg';
   imgEl.alt = car.name || 'car';
   card.appendChild(imgEl);
 
