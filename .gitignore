@@ -21,3 +21,6 @@ desktop.ini
 # Старые неиспользуемые файлы данных
 data.json
 hotwheels.json
+
+# Локальные правила для Claude
+CLAUDE.md
