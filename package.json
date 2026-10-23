@@ -17,6 +17,7 @@
       "renderer.js",
       "index.html",
       "style.css",
+      "src/**",
       "picture_work/**"
     ],
     "win": {
