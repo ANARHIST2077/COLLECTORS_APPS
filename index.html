@@ -7,6 +7,10 @@
 </head>
 <body>
   <h1 class="title">🔥 Hot Wheels Collection 🔥</h1>
+  <div id="searchBarWrapper">
+    <input id="searchInputUI" type="text" placeholder="Поиск по названию...">
+  </div>
+
 
   <div class="controls">
     <button id="exportBtn">Выгрузить коллекцию</button>
@@ -15,10 +19,7 @@
 
     <button id="addCarBtn">+ Add Car</button>
     
-    <label>
-      Поиск:
-      <input type="text" id="searchInput" placeholder="Введите название...">
-    </label>
+    
 
     <div class="stats">
       <span id="carCountLabel">Машин в гараже: 0</span>
@@ -27,6 +28,8 @@
 
 
     <p id="carCountLabel">Машин в гараже: 0</p>
+
+
 
 
     <!-- Модальное окно добавление карты -->
@@ -145,13 +148,49 @@
         </button>
       </div>
     </div>
+  </div>
 
+  <div class="garage-tabs">
+    <button class="garage-tab active" data-tab="all">Все</button>
+    <button class="garage-tab" data-tab="filter">Фильтр</button>
+    <button class="garage-tab" data-tab="groups">Группы</button>
+  </div>
 
+  <!-- Блок фильтра -->
+  <div id="filterPanel" class="filter-panel hidden">
+    <label>Фильтр по году модельки:</label>
+    <select id="yearFilter">
+      <option value="">Все</option>
+      <option value="2020">2020</option>
+      <option value="2021">2021</option>
+      <option value="2022">2022</option>
+      <option value="2023">2023</option>
+    </select>
+  </div>
 
-
+  <div id="searchPanel" class="filter-panel">
+    <label>
+      Поиск:
+      <input type="text" id="searchInput" placeholder="Введите название...">
+    </label>
   </div>
 
   <div id="cardsContainer" class="cards-container"></div>
+
+  <!-- Нижняя навигация -->
+  <div id="bottomNav" class="bottom-nav">
+    <div class="nav-item active" data-tab="garage">
+      <span class="material-icons">directions_car</span>
+      <div class="nav-label">Гараж</div>
+    </div>
+
+    <!--<div class="nav-item" data-tab="search">
+      <span class="material-icons">search</span>
+      <div class="nav-label">Поиск</div>
+    </div>-->
+  </div>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
 
   <script src="renderer.js"></script>
 </body>

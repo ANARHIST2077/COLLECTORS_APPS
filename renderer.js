@@ -500,7 +500,114 @@ function updateCarStats(filteredCars = cars) {
   if (totalPriceLabel) totalPriceLabel.textContent = `Общая стоимость: ${totalPrice} ₽`;
 }
 
+const bottomNav = document.getElementById("bottomNav");
+const searchBarWrapper = document.getElementById("searchBarWrapper");
+const searchInputUI = document.getElementById("searchInputUI");
 
+// Переключение вкладок
+document.querySelectorAll(".nav-item").forEach(item => {
+  item.addEventListener("click", () => {
+    document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+    item.classList.add("active");
+
+    const tab = item.dataset.tab;
+
+    if (tab === "garage") {
+      searchBarWrapper.style.display = "none";
+      searchInputUI.value = "";
+      renderCardsList(cars); // Обновляем список
+    }
+
+    if (tab === "search") {
+      searchBarWrapper.style.display = "block";
+      searchInputUI.focus();
+    }
+  });
+});
+
+// Логика поиска
+searchInputUI.addEventListener("input", () => {
+  const q = searchInputUI.value.toLowerCase().trim();
+  const filtered = cars.filter(c => c.name.toLowerCase().includes(q));
+  renderCardsList(filtered);
+});
+
+
+
+//переключение фильтров в караже
+const garageTabs = document.querySelectorAll(".garage-tab");
+const filterPanel = document.getElementById("filterPanel");
+const yearFilter = document.getElementById("yearFilter");
+const searchPanel = document.getElementById("searchPanel");
+
+let currentGarageTab = "all";
+
+// 🔥 функция ВНЕ forEach
+function renderAllCards() {
+  container.innerHTML = "";
+
+  let filteredCars = [...cars];
+
+  // 🔍 ПОИСК
+  if (currentGarageTab === "all" && searchInput) {
+    const query = searchInput.value.toLowerCase();
+
+    if (query) {
+      filteredCars = filteredCars.filter(c =>
+        (c.name || "").toLowerCase().includes(query)
+      );
+    }
+  }
+
+  // 🎯 ФИЛЬТР
+  if (currentGarageTab === "filter") {
+    const selectedYear = yearFilter.value;
+
+    if (selectedYear) {
+      filteredCars = filteredCars.filter(c =>
+        String(c.modelYear) === selectedYear
+      );
+    }
+  }
+
+  filteredCars.forEach(c => renderCard(c));
+  updateGarageStats(filteredCars);
+}
+
+// 🔥 переключение вкладок
+garageTabs.forEach(tab => {
+  tab.addEventListener("click", () => {
+    garageTabs.forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+
+    currentGarageTab = tab.dataset.tab;
+
+    if (currentGarageTab === "all") {
+      searchPanel.classList.remove("hidden");
+      filterPanel.classList.add("hidden");
+    }
+    else if (currentGarageTab === "filter") {
+      filterPanel.classList.remove("hidden");
+      searchPanel.classList.add("hidden");
+    }
+    else {
+      searchPanel.classList.add("hidden");
+      filterPanel.classList.add("hidden");
+    }
+
+    renderAllCards();
+  });
+});
+
+// 🔥 реакция на выбор года
+if (yearFilter) {
+  yearFilter.addEventListener("change", renderAllCards);
+}
+if (searchInput) {
+  searchInput.addEventListener("input", () => {
+    renderAllCards();
+  });
+}
 
 // ====== INIT ======
 loadData();
