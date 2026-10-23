@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Hot Wheels Collection</string>
+    <string name="title_activity_main">Hot Wheels Collection</string>
+    <string name="package_name">com.anarhist2077.hotwheels</string>
+    <string name="custom_url_scheme">com.anarhist2077.hotwheels</string>
+</resources>

@@ -1,7 +1,7 @@
 // Модалки машинки: добавление, просмотр, редактирование, удаление
 import { safeParseInt, createCar, touch } from '../core/car.js';
 import { collection, saveCollection } from '../collection.js';
-import { storeImage, getImageUrl } from '../storage/electron-storage.js';
+import { storage } from '../storage/index.js';
 import { refreshGarage, updateYearFilterOptions, updateCarStats, getVisibleCars } from './garage.js';
 
 // ====== DOM элементы ======
@@ -49,7 +49,7 @@ async function processFiles(files) {
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
-    images.push(await storeImage(base64) ?? base64);
+    images.push(await storage.storeImage(base64) ?? base64);
   }
   return images;
 }
@@ -95,7 +95,7 @@ function renderEditImages() {
     wrapper.dataset.index = idx;
 
     const img = document.createElement('img');
-    img.src = getImageUrl(imgSrc);
+    img.src = storage.getImageUrl(imgSrc);
     wrapper.appendChild(img);
 
     const delBtn = document.createElement('button');
@@ -200,7 +200,7 @@ export function openViewModal(car) {
   if (priceEl) priceEl.textContent = car.price ? car.price + " ₽" : "-";
 
   let current = 0;
-  const imgs = (car.images ?? []).map(getImageUrl);
+  const imgs = (car.images ?? []).map(storage.getImageUrl);
   if (imageEl) imageEl.src = imgs.length ? imgs[0] : 'picture_work/zagluh_card.jpg';
 
   if (prevBtn && nextBtn) {

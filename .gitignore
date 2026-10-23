@@ -5,6 +5,9 @@ node_modules/
 dist/
 out/
 
+# Собранный интерфейс (vite build) — общий для Electron и Android
+www/
+
 # Логи
 npm-debug.log*
 *.log

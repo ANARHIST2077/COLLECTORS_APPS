@@ -3,8 +3,10 @@
   "version": "2.0.0",
   "main": "main.js",
   "scripts": {
-    "start": "electron .",
-    "dist": "electron-builder --win portable"
+    "build:web": "vite build",
+    "start": "vite build && electron .",
+    "dist": "vite build && electron-builder --win portable",
+    "android": "vite build && cap sync android"
   },
   "build": {
     "appId": "com.anarhist2077.hotwheels",
@@ -16,11 +18,8 @@
       "main.js",
       "main-storage.js",
       "preload.js",
-      "renderer.js",
-      "index.html",
-      "style.css",
-      "src/**",
-      "picture_work/**"
+      "www/**",
+      "!node_modules/@capacitor/**"
     ],
     "win": {
       "target": "portable",
@@ -28,8 +27,10 @@
     }
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.3",
     "electron": "^38.0.0",
-    "electron-builder": "^24.13.3"
+    "electron-builder": "^24.13.3",
+    "vite": "^8.3.5"
   },
   "description": "",
   "keywords": [],
@@ -37,6 +38,10 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/filesystem": "^8.1.5",
+    "@capacitor/share": "^8.0.3",
     "fs-extra": "^11.3.1"
   }
 }

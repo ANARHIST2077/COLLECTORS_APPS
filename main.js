@@ -18,7 +18,7 @@ function createWindow() {
   // Для отладки можно временно открыть DevTools:
   // win.webContents.openDevTools();
 
-  win.loadFile('index.html');
+  win.loadFile('www/index.html'); // собирается командой vite build
   //win.webContents.openDevTools({ mode: 'detach' });
 }
 

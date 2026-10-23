@@ -1,7 +1,7 @@
 // Выгрузка и загрузка коллекции файлом (перенос между устройствами)
 import { normalizeCar, createCar } from '../core/car.js';
 import { collection, activeCars, saveCollection } from '../collection.js';
-import * as storage from '../storage/electron-storage.js';
+import { storage } from '../storage/index.js';
 import { refreshGarage } from './garage.js';
 
 const exportBtn = document.getElementById('exportBtn');
@@ -24,15 +24,8 @@ exportBtn.addEventListener('click', async () => {
     exportData.push(carCopy);
   }
 
-  // создаём blob и "скачиваем"
-  const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'hotwheels_collection.json';
-  a.click();
-  URL.revokeObjectURL(url);
+  // на ПК — скачивание файла, на телефоне — меню «Поделиться»
+  await storage.exportFile('hotwheels_collection.json', JSON.stringify(exportData, null, 2));
 });
 
 //Импорт коллекции

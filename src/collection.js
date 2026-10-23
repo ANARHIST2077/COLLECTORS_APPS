@@ -1,7 +1,8 @@
 // Коллекция в памяти + загрузка и сохранение через хранилище
 import { SCHEMA_VERSION, createCar, fromStored } from './core/car.js';
 import { migrateV1 } from './core/migrate.js';
-import * as storage from './storage/electron-storage.js';
+import { isUrl } from './core/images.js';
+import { storage } from './storage/index.js';
 
 export const collection = {
   cars: [] // вместе с удалёнными (deleted: true)
@@ -23,7 +24,7 @@ export function saveCollection() {
 
 // Имена файлов фото, на которые ссылается коллекция
 function usedImageNames() {
-  return collection.cars.flatMap(c => c.images).filter(i => !/^(data:|https?:|file:)/.test(i));
+  return collection.cars.flatMap(c => c.images).filter(i => !isUrl(i));
 }
 
 // Первый запуск новой версии: бэкап, перевод в формат V2, перенос лишних фото в бэкап
@@ -38,6 +39,7 @@ async function migrateLegacy(rawCars) {
 
 export async function loadCollection() {
   try {
+    await storage.init();
     const loaded = await storage.loadData();
     if (loaded === null) {
       collection.cars = [
