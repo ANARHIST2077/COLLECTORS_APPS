@@ -1,0 +1,23 @@
+# Зависимости (восстанавливаются через npm install)
+node_modules/
+
+# Результаты сборки (exe выкладывается в GitHub Releases)
+dist/
+out/
+
+# Логи
+npm-debug.log*
+*.log
+
+# Системные файлы
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Настройки редакторов
+.vscode/
+.idea/
+
+# Старые неиспользуемые файлы данных
+data.json
+hotwheels.json
