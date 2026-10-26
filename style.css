@@ -1,405 +1,140 @@
-body {
+/* Общие стили: цвета, шрифты, кнопки, поля. Стили отдельных экранов — в их .vue файлах */
+
+:root {
+  --bg: #0b0b0e;
+  --surface: #16161b;
+  --surface-2: #1f1f26;
+  --surface-3: #2a2a33;
+  --border: #2c2c36;
+  --text: #f4f4f6;
+  --muted: #9b9ba8;
+  --faint: #6b6b78;
+
+  --accent: #f2541b;          /* фирменный оранжево-красный (проверен на тёмном фоне) */
+  --accent-hot: #ff7a2f;
+  --flame: #ffb81c;
+  --blue: #2f6bff;
+  --danger: #ff3b4e;
+  --chart: #f2541b;
+
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, .45);
+  --ease: cubic-bezier(.2, .8, .2, 1);
+
+  --font: 'Inter Variable', system-ui, sans-serif;
+  --font-display: 'Unbounded Variable', 'Inter Variable', sans-serif;
+
+  /* отступы под вырез экрана и системные панели на телефоне */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --nav-height: 64px;
+
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0d0d0d;
-  color: #ffd700;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
 }
 
-.title {
-  font-size: 2rem;
-  margin-bottom: 20px;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-}
+button, input, select, textarea { font: inherit; color: inherit; }
+h1, h2 { font-weight: 800; }
+button { cursor: pointer; }
+img { display: block; }
 
-.controls {
-  margin-bottom: 20px;
-}
+:focus-visible { outline: 2px solid var(--accent-hot); outline-offset: 2px; }
 
-button {
-  background: #ffd700;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
-}
-button:hover {
-  background: #e6c200;
-}
+/* тонкая тёмная полоса прокрутки (на ПК) */
+* { scrollbar-width: thin; scrollbar-color: var(--surface-3) transparent; }
 
-.cards-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
-  width: 100%;
-  max-width: 1200px;
-}
-
-.card {
-  background: #1a1a1a;
-  border: 2px solid #ffd700;
-  border-radius: 12px;
-  padding: 15px;
-  position: relative;
-  box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
-}
-
-.card h2 {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-.card p {
-  margin: 5px 0;
-  font-size: 0.9rem;
-  opacity: 0.8;
-}
-
-.delete-btn {
-  position: absolute;
-  top: 5px;
-  right: 8px;
-  background: transparent;
-  border: none;
-  font-size: 1.2rem;
-  color: #ffd700;
-  cursor: pointer;
-}
-.delete-btn:hover {
-  color: red;
-}
-
-/* Общие стили модалок */
-.modal {
-  display: none; /* скрыто по умолчанию */
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.6);
-  z-index: 10;
-}
-
-.modal-content {
-  background-color: #1a1a1a;
-  color: #fff;
-  margin: 10% auto;
-  padding: 20px;
-  border: 1px solid #444;
-  width: 300px;
-  border-radius: 12px;
-}
-
-.close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.close:hover {
-  color: #fff;
-}
-
-
-/* стиль карточки */
-.car-image {
-  width: 100%;
-  max-height: 150px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 10px;
-}
-
-.car-thumb {
-  width: 100%;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  background: #222;
-}
-.car-thumb.placeholder {
-  display: flex;
+/* ====== Кнопки ====== */
+.btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #888;
-  font-size: 14px;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 14px;
+  font-weight: 650;
+  background: var(--surface-2);
+  transition: transform .15s var(--ease), background .2s, opacity .2s;
 }
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .5; pointer-events: none; }
+.btn svg { width: 20px; height: 20px; }
 
-/* Слайдер */
-#deleteSlider {
-  -webkit-appearance: none;
-  height: 12px;
-  border-radius: 6px;
-  background: linear-gradient(to right, #ff4d4d, #ccc);
-  outline: none;
-  transition: background 0.3s;
-  cursor: pointer;
-}
-#deleteSlider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 24px;
-  height: 24px;
+.btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-hot)); color: #fff; }
+.btn-danger { background: rgba(255, 59, 78, .12); color: var(--danger); }
+.btn-ghost { background: transparent; color: var(--muted); }
+.btn-block { width: 100%; }
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: none;
   border-radius: 50%;
-  background: #ff4d4d;
-  cursor: grab;
-  transition: transform 0.2s;
+  background: var(--surface-2);
+  transition: transform .15s var(--ease), background .2s;
 }
-#deleteSlider:active::-webkit-slider-thumb {
-  transform: scale(1.2);
-}
-#deleteFeedback {
-  text-align: center;
-  font-weight: bold;
-  color: green;
-  opacity: 0;
-  transition: opacity 0.4s;
-}
-#deleteFeedback.success {
-  opacity: 1;
-}
+.icon-btn:active { transform: scale(.92); }
+.icon-btn svg { width: 20px; height: 20px; }
 
-/* Модалка информации о карточке */
-.info-modal {
-  display: none; /* тоже скрыта по умолчанию */
-  position: fixed;
-  top: 0;
-  left: 0;
+/* ====== Поля ====== */
+.field { display: grid; gap: 6px; }
+.field > span { font-size: 13px; color: var(--muted); font-weight: 550; }
+
+.input {
   width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.7);
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal.hidden {
-  display: none;
-}
-
-.modal-content {
-  background: #383838;
-  padding: 20px;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
   border-radius: 12px;
-  width: 400px;
-  max-height: 80vh;
-  overflow-y: auto;
-  position: relative;
-}
-
-.close {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.edit-btn {
-  margin-top: 15px;
-  padding: 8px 12px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-/* Модалка редактирования карточки */
-#editCarModal .modal-content {
-  max-width: 400px;
-}
-
-.save-btn {
-  margin-top: 15px;
-  padding: 8px 12px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.image-viewer {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.nav-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0,0,0,0.4);
-    border: none;
-    color: white;
-    font-size: 24px;
-    padding: 8px 12px;
-    cursor: pointer;
-    border-radius: 6px;
-    user-select: none;
-}
-
-#prevImageBtn {
-    left: -10px;
-}
-#nextImageBtn {
-    right: -10px;
-}
-
-.edit-image-wrapper {
-  position: relative;
-  display: inline-block;
-  margin: 5px;
-}
-
-.edit-image-wrapper img {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-
-.edit-image-wrapper button {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 22px;
-  height: 22px;
-  border-radius: 5px; /* скругленные углы */
-  border: none;
-  background: rgba(255, 0, 0, 0.8);
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  line-height: 1;
-  padding: 0;
-}
-
-
-/* ===== Нижняя навигация ===== */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 70px;
-  background: #111;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  border-top: 2px solid #333;
-  z-index: 999;
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: #777;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.nav-item .material-icons {
-  font-size: 28px;
-}
-
-.nav-item.active {
-  color: #ff5500;
-  transform: translateY(-4px);
-}
-
-.nav-label {
-  font-size: 12px;
-  margin-top: 3px;
-}
-
-/* ===== Поисковая строка, появляющаяся сверху ===== */
-#searchBarWrapper {
-  display: none;
-  width: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  padding: 12px;
-  background: rgba(20, 20, 20, 0.95);
-  backdrop-filter: blur(5px);
-  z-index: 900;
-}
-
-#searchInputUI {
-  width: 90%;
-  margin: 0 auto;
-  padding: 10px 14px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: none;
+  background: var(--surface-2);
   outline: none;
-  background: #222;
-  color: #fff;
+  transition: border-color .2s;
 }
+.input:focus { border-color: var(--accent); }
+.input::placeholder { color: var(--faint); }
 
-
-.garage-tabs {
-  display: flex;
-  justify-content: center;
-  margin: 10px auto;
-  width: fit-content;
-  background: #1a1a1a;
-  border-radius: 12px;
-  overflow: hidden; /* важно! */
-  border: 1px solid #333;
+/* ====== Метки на карточках ====== */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 650;
+  background: var(--surface-3);
+  color: var(--text);
+  white-space: nowrap;
 }
+.tag-blue { background: var(--blue); color: #fff; }
 
-.garage-tab {
-  padding: 10px 20px;
-  border: none;
-  background: transparent;
-  color: #aaa;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, .25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
 }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* разделители */
-.garage-tab:not(:last-child) {
-  border-right: 1px solid #333;
-}
-
-/* активная вкладка */
-.garage-tab.active {
-  background: #ff3c00;
-  color: white;
-  box-shadow: inset 0 0 8px rgba(0,0,0,0.4);
-}
-
-/* hover */
-.garage-tab:hover {
-  background: #2a2a2a;
-  color: white;
-}
-
-.filter-panel {
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.hidden {
-  display: none;
-}
-
-#searchPanel {
-  text-align: center;
-  margin-bottom: 10px;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
