@@ -2,7 +2,7 @@
 // Настройки: синхронизация через GitHub, перенос файлом и сведения о приложении
 import { ref, reactive, computed, onMounted } from 'vue';
 import { Capacitor } from '@capacitor/core';
-import { Upload, Download, CloudUpload, CloudDownload, KeyRound } from 'lucide-vue-next';
+import { Upload, Download, CloudUpload, CloudDownload, KeyRound, ExternalLink } from 'lucide-vue-next';
 import { activeCars, exportCollection, importCollection } from '../collection.js';
 import { loadSyncSettings, saveSyncSettings, remoteInfo, pushCollection, pullCollection, SyncError } from '../sync.js';
 import { toast } from '../composables/toast.js';
@@ -42,13 +42,23 @@ onMounted(async () => {
   if (sync.configured) refreshRemote();
 });
 
+const formError = ref('');
+
 async function onSaveSync() {
+  // можно вставить и полную ссылку: https://github.com/владелец/название
+  sync.repo = sync.repo.trim().replace(/^https?:\/\/github\.com\//i, '').replace(/\.git$|\/+$/g, '');
+  sync.token = sync.token.trim();
+  if (!/^[\w.-]+\/[\w.-]+$/.test(sync.repo)) { formError.value = 'Укажите репозиторий в виде владелец/название, например ANARHIST2077/hotwheels-data'; return; }
+  if (!sync.token) { formError.value = 'Вставьте токен доступа'; return; }
+  formError.value = '';
   await saveSyncSettings(sync);
-  sync.configured = !!(sync.repo.trim() && sync.token.trim());
-  sync.editing = !sync.configured;
+  sync.configured = true;
+  sync.editing = false;
   toast('Доступ сохранён');
-  if (sync.configured) refreshRemote();
+  refreshRemote();
 }
+
+const RELEASES_URL = 'https://github.com/ANARHIST2077/COLLECTORS_APPS/releases';
 
 async function runSync(kind, action, done) {
   sync.busy = kind;
@@ -165,6 +175,7 @@ async function onImport(e) {
           <span>Токен доступа</span>
           <input v-model="sync.token" class="input" type="password" placeholder="github_pat_…" autocomplete="off" />
         </label>
+        <p v-if="formError" class="form-error">{{ formError }}</p>
         <p class="hint">
           Токен создаётся на GitHub: Settings → Developer settings → Fine-grained tokens.
           Доступ только к этому репозиторию, право «Contents: Read and write».
@@ -207,6 +218,9 @@ async function onImport(e) {
       <p v-if="isAndroid" class="note">
         Коллекция хранится внутри приложения и удаляется вместе с ним — перед удалением выгрузите её.
       </p>
+      <a class="btn btn-block releases" :href="RELEASES_URL" target="_blank" rel="noopener">
+        <ExternalLink />Скачать новые версии на GitHub
+      </a>
     </section>
   </div>
 </template>
@@ -241,6 +255,8 @@ label.btn.disabled { opacity: .5; pointer-events: none; }
 .progress { margin: 12px 0 0; font-size: 13px; }
 .sync-form { display: grid; gap: 12px; }
 .hint { margin: 0; font-size: 12.5px; }
+.form-error { margin: 0; color: var(--danger); font-size: 13px; }
+.releases { margin-top: 14px; text-decoration: none; }
 .link-btn {
   margin-top: 12px;
   padding: 0;
