@@ -15,6 +15,24 @@ export function saveData(data) {
   return bridge.saveData(data);
 }
 
+// Настройки устройства (доступ к GitHub для синхронизации)
+export function loadSettings() {
+  return bridge.loadSettings();
+}
+
+export function saveSettings(settings) {
+  return bridge.saveSettings(settings);
+}
+
+// Копия коллекции перед заменой версией с сервера (collection.prev.json)
+export function saveCollectionBackup(data) {
+  return bridge.saveCollectionBackup(data);
+}
+
+export function hasImage(name) {
+  return bridge.hasImage(name);
+}
+
 // Сохраняет фото (data URL, file:// или ссылка) в папку images, возвращает имя файла или null
 export function storeImage(src) {
   return bridge.storeImage(src);

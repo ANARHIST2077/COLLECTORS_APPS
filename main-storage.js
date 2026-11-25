@@ -62,6 +62,18 @@ function registerStorageHandlers() {
     return null;
   });
 
+  // Настройки устройства (например, доступ к GitHub для синхронизации)
+  const settingsFile = path.join(userDataPath, 'settings.json');
+  ipcMain.handle('storage:loadSettings', () => fs.existsSync(settingsFile) ? fs.readJsonSync(settingsFile) : {});
+  ipcMain.handle('storage:saveSettings', (e, settings) => writeJsonSafe(settingsFile, settings));
+
+  // Копия коллекции перед заменой версией с сервера
+  ipcMain.handle('storage:saveCollectionBackup', (e, data) => {
+    writeJsonSafe(path.join(userDataPath, 'collection.prev.json'), data);
+  });
+
+  ipcMain.handle('storage:hasImage', (e, name) => IMAGE_NAME.test(name) && fs.existsSync(path.join(imagesDir, name)));
+
   ipcMain.handle('storage:saveData', (e, data) => {
     writeJsonSafe(dataFile, data);
   });

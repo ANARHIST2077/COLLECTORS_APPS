@@ -23,4 +23,9 @@ export function formatDate(iso) {
   return new Date(iso).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+export function formatDateTime(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
 export const PLACEHOLDER_IMAGE = 'picture_work/zagluh_card.jpg';

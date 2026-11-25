@@ -14,8 +14,7 @@ const SORTS = {
   priceDesc: 'Дороже',
   priceAsc: 'Дешевле',
   yearDesc: 'Год модели ↓',
-  yearAsc: 'Год модели ↑',
-  favFirst: 'Сначала избранные'
+  yearAsc: 'Год модели ↑'
 };
 
 const MODES = [
@@ -64,11 +63,11 @@ const visible = computed(() => {
     priceDesc: (a, b) => byNumber(a.price, b.price, -1) || added(b, a),
     priceAsc: (a, b) => byNumber(a.price ?? Infinity, b.price ?? Infinity, 1) || added(b, a),
     yearDesc: (a, b) => byNumber(a.modelYear, b.modelYear, -1) || added(b, a),
-    yearAsc: (a, b) => byNumber(a.modelYear ?? Infinity, b.modelYear ?? Infinity, 1) || added(b, a),
-    favFirst: (a, b) => (b.favorite - a.favorite) || added(b, a)
+    yearAsc: (a, b) => byNumber(a.modelYear ?? Infinity, b.modelYear ?? Infinity, 1) || added(b, a)
   }[sort.value];
 
-  return [...list].sort(compare);
+  // избранные всегда сверху; выбранная сортировка действует отдельно внутри избранных и внутри остальных
+  return [...list].sort((a, b) => (b.favorite - a.favorite) || compare(a, b));
 });
 
 const total = computed(() => visible.value.reduce((sum, c) => sum + (c.price ?? 0), 0));

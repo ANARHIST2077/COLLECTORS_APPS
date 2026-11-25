@@ -49,6 +49,28 @@ export async function saveData(data) {
   }
 }
 
+// Настройки устройства (доступ к GitHub для синхронизации)
+const SETTINGS_FILE = 'settings.json';
+
+export async function loadSettings() {
+  if (!(await exists(SETTINGS_FILE))) return {};
+  const { data } = await Filesystem.readFile({ path: SETTINGS_FILE, directory: Directory.Data, encoding: Encoding.UTF8 });
+  return JSON.parse(data);
+}
+
+export async function saveSettings(settings) {
+  await Filesystem.writeFile({ path: SETTINGS_FILE, directory: Directory.Data, encoding: Encoding.UTF8, data: JSON.stringify(settings, null, 2) });
+}
+
+// Копия коллекции перед заменой версией с сервера (collection.prev.json)
+export async function saveCollectionBackup(data) {
+  await Filesystem.writeFile({ path: 'collection.prev.json', directory: Directory.Data, encoding: Encoding.UTF8, data: JSON.stringify(data, null, 2) });
+}
+
+export async function hasImage(name) {
+  return IMAGE_NAME.test(name) && exists(`${IMAGES_DIR}/${name}`);
+}
+
 // Сохраняет фото из data URL в images, возвращает имя файла или null.
 // Ссылки из интернета на телефоне не скачиваем — они остаются как есть.
 export async function storeImage(src) {

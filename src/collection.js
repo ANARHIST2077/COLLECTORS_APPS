@@ -27,6 +27,18 @@ export function saveCollection() {
     .catch(err => console.error('Ошибка сохранения данных:', err));
 }
 
+// Копия коллекции без реактивных обёрток (для отправки на сервер)
+export function snapshot() {
+  return { schemaVersion: SCHEMA_VERSION, cars: JSON.parse(JSON.stringify(collection.cars)) };
+}
+
+// Заменить коллекцию версией с сервера; текущая перед этим сохраняется в collection.prev.json
+export async function replaceCollection(cars) {
+  await storage.saveCollectionBackup(snapshot());
+  collection.cars = cars.map(fromStored);
+  saveCollection();
+}
+
 // Имена файлов фото, на которые ссылается коллекция
 function usedImageNames() {
   return collection.cars.flatMap(c => c.images).filter(i => !isUrl(i));
