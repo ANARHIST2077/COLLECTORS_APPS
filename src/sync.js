@@ -39,11 +39,13 @@ async function client() {
   const { repo, token } = await loadSyncSettings();
   if (!/^[\w.-]+\/[\w.-]+$/.test(repo) || !token) throw new SyncError('Укажите репозиторий и токен в настройках синхронизации');
 
-  async function call(url, { method = 'GET', body, raw = false } = {}) {
+  // allow: коды ответа, которые вызывающий разбирает сам (не считаются ошибкой)
+  async function call(url, { method = 'GET', body, raw = false, allow = [] } = {}) {
     let res;
     try {
       res = await fetch(url, {
         method,
+        cache: 'no-store', // всегда свежий ответ: после отправки с другого устройства кэш устаревает
         headers: {
           Authorization: `Bearer ${token}`,
           Accept: raw ? 'application/vnd.github.raw+json' : 'application/vnd.github+json',
@@ -55,10 +57,14 @@ async function client() {
     } catch {
       throw new SyncError('Нет связи с GitHub — проверьте интернет');
     }
+    if (allow.includes(res.status)) return res;
     if (res.status === 404) return null;
     if (res.status === 401) throw new SyncError('GitHub не принял токен — проверьте его в настройках');
     if (res.status === 403) throw new SyncError('Нет доступа: у токена должно быть право Contents: Read and write на этот репозиторий');
-    if (!res.ok) throw new SyncError(`GitHub ответил ошибкой ${res.status}`);
+    if (!res.ok) {
+      const detail = await res.json().then(j => j.message).catch(() => '');
+      throw new SyncError(`GitHub ответил ошибкой ${res.status}${detail ? `: ${detail}` : ''}`);
+    }
     return res;
   }
 
@@ -83,8 +89,22 @@ async function client() {
       const res = await call(contents(dir));
       return res ? (await res.json()).map(f => f.name) : [];
     },
-    async put(path, base64, message, sha) {
-      await call(contents(path), { method: 'PUT', body: { message, content: base64, ...(sha ? { sha } : {}) } });
+    // Создать или заменить файл. 409/422 — на сервере уже другая версия файла (или он уже есть):
+    // берём её sha и повторяем один раз. keepExisting — файл уже есть, значит, ничего делать не нужно
+    // (фото: имя — хеш содержимого, то есть на сервере то же самое фото). Возвращает true, если файл записан.
+    async put(path, base64, message, sha, { keepExisting = false } = {}) {
+      const send = s => call(contents(path), { method: 'PUT', allow: [409, 422], body: { message, content: base64, ...(s ? { sha: s } : {}) } });
+      let res = await send(sha);
+      if (res.status !== 409 && res.status !== 422) return true;
+
+      const current = await this.fileSha(path);
+      if (current && keepExisting) return false;
+      if (current && current !== sha) res = await send(current);
+      if (res.status === 409 || res.status === 422) {
+        const detail = await res.json().then(j => j.message).catch(() => '');
+        throw new SyncError(`GitHub не принял файл ${path} (${res.status}${detail ? `: ${detail}` : ''})`);
+      }
+      return true;
     }
   };
 }
@@ -112,10 +132,11 @@ export async function pushCollection(onProgress = () => {}) {
   const remote = new Set(await gh.listNames('images'));
   const missing = imageNames(data.cars).filter(n => !remote.has(n));
 
+  let uploaded = 0;
   for (const [i, name] of missing.entries()) {
     onProgress(`Отправка фото ${i + 1} из ${missing.length}…`);
     const dataUrl = await storage.readImageAsDataUrl(name);
-    await gh.put(`images/${name}`, dataUrl.split(',')[1], `Фото ${name}`);
+    if (await gh.put(`images/${name}`, dataUrl.split(',')[1], `Фото ${name}`, null, { keepExisting: true })) uploaded++;
   }
 
   onProgress('Отправка коллекции…');
@@ -124,7 +145,7 @@ export async function pushCollection(onProgress = () => {}) {
   await gh.put('collection.json', textToBase64(JSON.stringify(payload, null, 2)),
     `Коллекция: ${count} машинок (${deviceName()})`, await gh.fileSha('collection.json'));
 
-  return { count, photos: missing.length };
+  return { count, photos: uploaded };
 }
 
 // ====== Обновить коллекцию на устройстве ======
