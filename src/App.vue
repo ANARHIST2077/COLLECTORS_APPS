@@ -53,6 +53,19 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <!-- общий радужный градиент для звезды избранного (используется в style.css) -->
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="holo-grad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ff9a9e" />
+        <stop offset=".25" stop-color="#fbd786" />
+        <stop offset=".5" stop-color="#9be7ff" />
+        <stop offset=".75" stop-color="#c3b5ff" />
+        <stop offset="1" stop-color="#f2f2f7" />
+      </linearGradient>
+    </defs>
+  </svg>
+
   <main class="screen">
     <Transition name="screen" mode="out-in">
       <KeepAlive>

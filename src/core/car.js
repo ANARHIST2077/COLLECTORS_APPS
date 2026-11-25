@@ -34,6 +34,7 @@ export function createCar({ name = null, realYear = null, modelYear = null, pric
     modelYear,
     price,
     images: [], // имена файлов в папке images (или ссылки, которые не удалось сохранить)
+    favorite: false, // избранная — в гараже выделяется радужной рамкой
     createdAt: now,
     updatedAt: now,
     deleted: false // удаление — пометка, а не стирание (нужно для синхронизации)
@@ -50,6 +51,7 @@ export function fromStored(raw) {
   });
   if (typeof raw.id === 'string' && raw.id) car.id = raw.id;
   car.images = Array.isArray(raw.images) ? raw.images.filter(i => typeof i === 'string') : [];
+  car.favorite = raw.favorite === true;
   if (raw.createdAt) car.createdAt = raw.createdAt;
   car.updatedAt = raw.updatedAt ?? car.createdAt;
   car.deleted = raw.deleted === true;

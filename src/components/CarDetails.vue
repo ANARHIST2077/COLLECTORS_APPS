@@ -1,8 +1,8 @@
 <script setup>
 // Просмотр машинки: фото листаются пальцем (на ПК — стрелками), детали, кнопки «Изменить» и «Удалить»
 import { ref, computed } from 'vue';
-import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-vue-next';
-import { collection, imageUrl } from '../collection.js';
+import { ChevronLeft, ChevronRight, Pencil, Trash2, Star } from 'lucide-vue-next';
+import { collection, imageUrl, toggleFavorite } from '../collection.js';
 import { openSheet } from '../composables/sheets.js';
 import { formatPrice, formatDate, PLACEHOLDER_IMAGE } from '../composables/format.js';
 
@@ -28,7 +28,7 @@ function go(i) {
 
 <template>
   <div v-if="car" class="details">
-    <div class="gallery">
+    <div class="gallery" :class="{ holo: car.favorite, 'holo-sheen': car.favorite }">
       <div ref="track" class="gallery-track" @scroll.passive="onScroll">
         <img v-for="(src, i) in photos" :key="i + src" :src="src" :alt="`${car.name || 'Машинка'}, фото ${i + 1}`" />
       </div>
@@ -41,7 +41,18 @@ function go(i) {
       </template>
     </div>
 
-    <h2>{{ car.name || 'Без названия' }}</h2>
+    <div class="title-row">
+      <h2>{{ car.name || 'Без названия' }}</h2>
+      <button
+        class="icon-btn fav-btn"
+        :class="{ 'star-on': car.favorite }"
+        :aria-pressed="car.favorite"
+        :aria-label="car.favorite ? 'Убрать из избранного' : 'В избранное'"
+        @click="toggleFavorite(car)"
+      >
+        <Star />
+      </button>
+    </div>
 
     <dl class="facts">
       <div><dt>Год модели</dt><dd>{{ car.modelYear ?? '—' }}</dd></div>
@@ -60,7 +71,7 @@ function go(i) {
 <style scoped>
 .details { display: grid; gap: 16px; }
 
-.gallery { position: relative; margin: 0 -8px; }
+.gallery { position: relative; margin: 0 -8px; border-radius: 18px; }
 .gallery-track {
   display: flex;
   overflow-x: auto;
@@ -104,6 +115,10 @@ function go(i) {
   transition: width .25s var(--ease), background .25s;
 }
 .gallery-dots span.active { width: 20px; background: #fff; }
+
+.title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.fav-btn { flex: none; width: 44px; height: 44px; }
+.fav-btn svg { width: 22px; height: 22px; }
 
 h2 {
   margin: 0;

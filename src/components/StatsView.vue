@@ -15,6 +15,7 @@ const tiles = computed(() => [
   { label: 'Машинок', value: cars.value.length },
   { label: 'Общая стоимость', value: formatPrice(total.value) },
   { label: 'Средняя цена', value: formatPrice(average.value) },
+  { label: 'Избранных', value: cars.value.filter(c => c.favorite).length },
   { label: 'Без фото', value: withoutPhoto.value }
 ]);
 

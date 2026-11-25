@@ -105,6 +105,12 @@ export function updateCar(car, fields, images) {
   saveCollection();
 }
 
+export function toggleFavorite(car) {
+  car.favorite = !car.favorite;
+  touch(car);
+  saveCollection();
+}
+
 // Удаление — пометка, а не стирание: так оно дойдёт до других устройств при синхронизации
 export function deleteCar(car) {
   car.deleted = true;
@@ -134,6 +140,7 @@ export async function importCollection(file) {
 
   for (const rawCar of importedCars) {
     const car = createCar(normalizeCar(rawCar));
+    car.favorite = rawCar.favorite === true;
     for (const base64 of rawCar.imagesBase64 || []) {
       const name = await storage.storeImage(base64);
       if (name) car.images.push(name);

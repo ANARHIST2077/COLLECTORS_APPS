@@ -135,6 +135,55 @@ img { display: block; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ====== Избранное: радужная рамка с серебряным отливом ======
+   .holo — тонкая переливающаяся рамка (элементу нужны position и border-radius),
+   .holo-sheen — блик, который время от времени пробегает по фото */
+@property --holo-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.holo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 2px;
+  border-radius: inherit;
+  /* пастельная радуга + серебро; угол крутится анимацией */
+  background: conic-gradient(from var(--holo-angle),
+    #ff9a9e, #fbd786, #c6ffdd, #9be7ff, #c3b5ff, #ffb3e6, #f2f2f7, #ff9a9e);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: holo-spin 6s linear infinite;
+}
+.holo { box-shadow: 0 0 22px rgba(195, 181, 255, .16), 0 0 2px rgba(242, 242, 247, .25); }
+
+@keyframes holo-spin { to { --holo-angle: 360deg; } }
+
+.holo-sheen { position: relative; overflow: hidden; }
+.holo-sheen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg,
+    transparent 35%, rgba(255, 255, 255, .28) 47%, rgba(195, 181, 255, .22) 52%, transparent 64%);
+  mix-blend-mode: screen;
+  transform: translateX(-110%);
+  animation: holo-sheen 5.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes holo-sheen {
+  0%, 68% { transform: translateX(-110%); }
+  100% { transform: translateX(110%); }
+}
+
+/* звезда избранного: заливка тем же переливом (градиент #holo-grad объявлен в App.vue) */
+.star-on svg { fill: url(#holo-grad); stroke: url(#holo-grad); }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }

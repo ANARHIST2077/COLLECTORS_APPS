@@ -14,15 +14,23 @@ const SORTS = {
   priceDesc: 'Дороже',
   priceAsc: 'Дешевле',
   yearDesc: 'Год модели ↓',
-  yearAsc: 'Год модели ↑'
+  yearAsc: 'Год модели ↑',
+  favFirst: 'Сначала избранные'
 };
+
+const MODES = [
+  { id: 'all', label: 'Машинки' },
+  { id: 'years', label: 'По годам' },
+  { id: 'favorites', label: 'Избранное' }
+];
 
 // выбранная сортировка запоминается на этом устройстве
 function loadSort() {
   try { return SORTS[localStorage.getItem('garage.sort')] ? localStorage.getItem('garage.sort') : 'new'; } catch { return 'new'; }
 }
 
-const mode = ref('all'); // 'all' | 'years'
+const mode = ref('all'); // 'all' | 'years' | 'favorites'
+const modeIndex = computed(() => MODES.findIndex(m => m.id === mode.value));
 const sort = ref(loadSort());
 const year = ref('');
 const query = ref('');
@@ -44,7 +52,8 @@ const visible = computed(() => {
   const q = query.value.trim().toLowerCase();
   let list = allCars.value.filter(c =>
     (!q || (c.name || '').toLowerCase().includes(q)) &&
-    (!year.value || String(c.modelYear) === year.value)
+    (!year.value || String(c.modelYear) === year.value) &&
+    (mode.value !== 'favorites' || c.favorite)
   );
 
   const added = (a, b) => (a.createdAt.localeCompare(b.createdAt)) || (order.value.get(a.id) - order.value.get(b.id));
@@ -55,14 +64,15 @@ const visible = computed(() => {
     priceDesc: (a, b) => byNumber(a.price, b.price, -1) || added(b, a),
     priceAsc: (a, b) => byNumber(a.price ?? Infinity, b.price ?? Infinity, 1) || added(b, a),
     yearDesc: (a, b) => byNumber(a.modelYear, b.modelYear, -1) || added(b, a),
-    yearAsc: (a, b) => byNumber(a.modelYear ?? Infinity, b.modelYear ?? Infinity, 1) || added(b, a)
+    yearAsc: (a, b) => byNumber(a.modelYear ?? Infinity, b.modelYear ?? Infinity, 1) || added(b, a),
+    favFirst: (a, b) => (b.favorite - a.favorite) || added(b, a)
   }[sort.value];
 
   return [...list].sort(compare);
 });
 
 const total = computed(() => visible.value.reduce((sum, c) => sum + (c.price ?? 0), 0));
-const isFiltered = computed(() => !!query.value.trim() || !!year.value);
+const isFiltered = computed(() => !!query.value.trim() || !!year.value || mode.value === 'favorites');
 
 // вкладка «По годам»: группы по году модели, новые сверху
 const groups = computed(() => {
@@ -81,14 +91,20 @@ const groups = computed(() => {
 <template>
   <div class="garage">
     <header class="garage-head">
+      <h1>Мой гараж</h1>
       <AppLogo />
-      <h1>Мой<br />гараж</h1>
     </header>
 
     <div class="segmented" role="tablist">
-      <span class="segmented-pill" :class="{ right: mode === 'years' }"></span>
-      <button role="tab" :aria-selected="mode === 'all'" :class="{ active: mode === 'all' }" @click="mode = 'all'">Машинки</button>
-      <button role="tab" :aria-selected="mode === 'years'" :class="{ active: mode === 'years' }" @click="mode = 'years'">По годам</button>
+      <span class="segmented-pill" :style="{ transform: `translateX(${modeIndex * 100}%)` }"></span>
+      <button
+        v-for="m in MODES"
+        :key="m.id"
+        role="tab"
+        :aria-selected="mode === m.id"
+        :class="{ active: mode === m.id }"
+        @click="mode = m.id"
+      >{{ m.label }}</button>
     </div>
 
     <div class="chips">
@@ -126,11 +142,12 @@ const groups = computed(() => {
     <Transition name="screen" mode="out-in">
       <div v-if="!visible.length" key="empty" class="empty">
         <PackageOpen />
-        <p v-if="isFiltered">Ничего не найдено</p>
+        <p v-if="mode === 'favorites' && !query.trim() && !year">Избранных пока нет — нажмите ★ на карточке</p>
+        <p v-else-if="isFiltered">Ничего не найдено</p>
         <p v-else>В гараже пусто — нажмите «+», чтобы добавить первую машинку</p>
       </div>
 
-      <TransitionGroup v-else-if="mode === 'all'" key="all" name="grid" tag="div" class="grid">
+      <TransitionGroup v-else-if="mode !== 'years'" key="all" name="grid" tag="div" class="grid">
         <CarCard v-for="car in visible" :key="car.id" :car="car" />
       </TransitionGroup>
 
@@ -147,12 +164,20 @@ const groups = computed(() => {
 </template>
 
 <style scoped>
-.garage-head { display: grid; gap: 6px; margin-bottom: 18px; }
+/* заголовок в одну строку, логотип справа — как у Hot Wheels */
+.garage-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 6px 0 18px;
+}
 .garage-head h1 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(38px, 9vw, 56px);
-  line-height: .95;
+  font-size: clamp(24px, 7vw, 40px);
+  line-height: 1;
+  white-space: nowrap;
   text-transform: uppercase;
   letter-spacing: .01em;
 }
@@ -161,8 +186,8 @@ const groups = computed(() => {
 .segmented {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  max-width: 420px;
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 520px;
   padding: 4px;
   margin-bottom: 12px;
   border-radius: 14px;
@@ -174,12 +199,11 @@ const groups = computed(() => {
   top: 4px;
   bottom: 4px;
   left: 4px;
-  width: calc(50% - 4px);
+  width: calc((100% - 8px) / 3);
   border-radius: 11px;
   background: linear-gradient(135deg, var(--accent), var(--accent-hot));
   transition: transform .3s var(--ease);
 }
-.segmented-pill.right { transform: translateX(100%); }
 .segmented button {
   position: relative;
   min-height: 38px;
@@ -187,6 +211,7 @@ const groups = computed(() => {
   background: transparent;
   color: var(--muted);
   font-weight: 700;
+  font-size: 14px;
   transition: color .25s;
 }
 .segmented button.active { color: #fff; }
